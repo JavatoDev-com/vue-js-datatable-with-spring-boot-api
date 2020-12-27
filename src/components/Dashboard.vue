@@ -10,7 +10,18 @@
       :server-items-length="totalBooks"
       :loading="loading"
       class="elevation-1"
+      :footer-props="{
+    'items-per-page-options': [5, 10, 20, 30, 40, 50]
+  }"
     >
+
+    <template v-slot:item.author="{ item }">
+        {{item.author.firstName}} {{item.author.lastName}}
+      </template>
+
+    <template v-slot:item.imageUrl="{ item }">
+        <img :src="item.imageUrl" style="width: 10%;" />
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -20,7 +31,7 @@ export default {
   name: "Dashboard",
   data() {
     return {
-      page: 0,
+      page: 1,
       totalBooks: 0,
       numberOfPages: 0,
       books: [],
@@ -29,7 +40,7 @@ export default {
       headers: [
         { text: "Name", value: "name" },
         { text: "ISBN", value: "isbn" },
-        { text: "Author", value: "author.firstName" },
+        { text: "Author", value: "author" },
         { text: "Image", value: "imageUrl" }
       ],
     };
@@ -48,8 +59,7 @@ export default {
     readDataFromAPI() {
       this.loading = true;
       const { page, itemsPerPage } = this.options;
-      let pageNumber = page;
-      console.log(pageNumber);
+      let pageNumber = page - 1;
       console.log("http://localhost:8081/api/library/book/search?size=" +
             itemsPerPage +
             "&page=" +
@@ -62,7 +72,6 @@ export default {
             pageNumber
         )
         .then((response) => {
-            console.log("Response from API "+ response.data.numberOfItems);
           //Then injecting the result to datatable parameters.
           this.loading = false;
           this.books = response.data.bookList;
@@ -70,6 +79,10 @@ export default {
           this.numberOfPages = response.data.numberOfPages;
         });
     },
+    getAuthor(value) {
+      console.log("Getting author "+value);
+      return value;
+    }
   },
   //this will trigger in the onReady State
   mounted() {
